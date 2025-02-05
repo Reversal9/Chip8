@@ -2,6 +2,7 @@
 
 // Chip8 fontset that includes characters 0 to F, 5 bytes long each (8 x 5
 // pixels)
+
 const uint8_t chip8_fontset[FONTSET_LENGTH] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -28,17 +29,27 @@ const uint8_t chip8_fontset[FONTSET_LENGTH] = {
 
 void init_chip8(Chip8 *chip8) {
   // Clear out the garbage values and set them to all-bits-zero
+
   memset(chip8, 0, sizeof(Chip8));
 
   // Preload the fontset into memory from 0x50 to 0x9F
+
   for (int i = 0; i < FONTSET_LENGTH; i++) {
     chip8->memory[i + 0x50] = chip8_fontset[i];
   }
 
   // Initialize stack pointer to 0 (empty stack)
+
   chip8->sp = 0;
 
-  // graphics
+  // Set program counter to 0x200 (start of ROM)
+
+  chip8->pc = 0x200;
+
+  // Set delay_timer and sound_timer to 0
+
+  chip8->delay_timer = 0;
+  chip8->sound_timer = 0;
 }
 
 void load_rom(Chip8 *chip8, char *rom_path) {
