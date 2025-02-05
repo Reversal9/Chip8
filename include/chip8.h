@@ -19,7 +19,7 @@ typedef struct {
   uint16_t opcode;              // opcode placeholder
   uint16_t stack[STACK_SIZE];   // 48 byte stack, handles 24 nested subroutine
                                 // calls in theory
-  uint8_t sp;                   // stack pointer, manages the call stack
+  uint8_t sp;                   // stack pointer, manages the call stack and points to the topmost empty index [0, STACK_SIZE - 1]
   uint8_t delay_timer;          // set and read, counts to 0 at 60 Hz
   uint8_t sound_timer;          // read, beeps when non-zero at 60 Hz
 } Chip8;

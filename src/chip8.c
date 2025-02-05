@@ -35,10 +35,9 @@ void init_chip8(Chip8 *chip8) {
     chip8->memory[i + 0x50] = chip8_fontset[i];
   }
 
-  // initialize system
-  // memory
-  // registers
-  // stack
+  // Initialize stack pointer to 0 (empty stack)
+  chip8->sp = 0;
+
   // graphics
 }
 
