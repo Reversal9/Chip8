@@ -7,17 +7,19 @@
 
 // Constants
 #define MEMORY_SIZE (4096)
+#define NUM_REGISTERS (16)
 #define STACK_SIZE (24) // Allows for n level of nested subroutines (must be at least 16)
 #define FONTSET_LENGTH (80)
 #define MAX_WIDTH (64)
 #define MAX_HEIGHT (32)
 #define TIMER_SPEED (60) // rate of timer decrement measured in Hz
 #define CLOCK_SPEED (600) // rate that instructions are executed in Hz
+#define KEYPAD_SIZE (16) // 16 keys for input map
 
 // Chip8 struct
 typedef struct {
   uint16_t memory[MEMORY_SIZE]; // 4KB memory from 0x000 to 0xFFF
-  uint8_t V[16];                // 16 general purpose 8-bit registers V0 to VF
+  uint8_t V[NUM_REGISTERS];                // 16 general purpose 8-bit registers V0 to VF
   uint16_t I;                   // index register, used in memory operations
   uint16_t pc;                  // program counter
   uint16_t opcode;              // opcode placeholder
@@ -27,6 +29,7 @@ typedef struct {
   uint8_t delay_timer;          // set and read, counts to 0 at 60 Hz
   uint8_t sound_timer;          // read, beeps when non-zero at 60 Hz
   uint8_t gfx[MAX_WIDTH * MAX_HEIGHT]; // graphics of chip8 are black (1) and white (0), screen has MAX_WIDTH by MAX_HEIGHT pixels
+  uint8_t keypad[KEYPAD_SIZE];
 } Chip8;
 
 // Chip8 fontset (0 to F) to be preloaded
