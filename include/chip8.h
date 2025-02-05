@@ -7,7 +7,7 @@
 
 // Constants
 #define MEMORY_SIZE (4096)
-#define STACK_SIZE (48)
+#define STACK_SIZE (24) // Allows for n level of nested subroutines (must be at least 16)
 #define FONTSET_LENGTH (80)
 #define MAX_WIDTH (64)
 #define MAX_HEIGHT (32)
@@ -21,7 +21,7 @@ typedef struct {
   uint16_t I;                   // index register, used in memory operations
   uint16_t pc;                  // program counter
   uint16_t opcode;              // opcode placeholder
-  uint16_t stack[STACK_SIZE];   // 48 byte stack, handles 24 nested subroutine
+  uint16_t stack[STACK_SIZE];   // 48 byte stack, handles 24 nested subroutines
                                 // calls in theory
   uint8_t sp;                   // stack pointer, manages the call stack and points to the topmost empty index [0, STACK_SIZE - 1]
   uint8_t delay_timer;          // set and read, counts to 0 at 60 Hz
