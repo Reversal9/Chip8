@@ -41,4 +41,8 @@ typedef struct {
 // Chip8 fontset (0 to F) to be preloaded
 extern const uint8_t chip8_fontset[FONTSET_LENGTH];
 
+// Function prototypes
+void init_chip8(Chip8 *chip8);
+int load_rom(Chip8 *chip8, char *rom_path);
+
 #endif // CHIP8_H
