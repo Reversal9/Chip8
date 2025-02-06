@@ -122,8 +122,7 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x3: // 3XNN: skips next instruction if Vx == NN
-    if (chip8->V[Vx(chip8->opcode)] ==
-        NN(chip8->opcode)) {
+    if (chip8->V[Vx(chip8->opcode)] == NN(chip8->opcode)) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -131,8 +130,7 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x4: // 4XNN: skips next instruction if Vx != NN
-    if (chip8->V[Vx(chip8->opcode)] !=
-        NN(chip8->opcode)) {
+    if (chip8->V[Vx(chip8->opcode)] != NN(chip8->opcode)) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -140,8 +138,7 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x5: // 5XY0: skips next instruction if Vx == Vy
-    if (chip8->V[Vx(chip8->opcode)] ==
-        chip8->V[Vy(chip8->opcode)]) {
+    if (chip8->V[Vx(chip8->opcode)] == chip8->V[Vy(chip8->opcode)]) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -158,25 +155,83 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x8:
-    if (LN(chip8->opcode) == 0) { // 8XY0: sets Vx = Vy
+    if (LN(chip8->opcode) == 0x0) { // 8XY0: sets Vx = Vy
+      chip8->V[Vx(chip8->opcode)] = chip8->V[Vy(chip8->opcode)];
+    } else if (LN(chip8->opcode) == 0x1) { // 8XY1: sets Vx |= Vy
+      chip8->V[Vx(chip8->opcode)] |= chip8->V[Vy(chip8->opcode)];
+    } else if (LN(chip8->opcode) == 0x2) { // 8XY2: sets Vx &= Vy
+      chip8->V[Vx(chip8->opcode)] &= chip8->V[Vy(chip8->opcode)];
+    } else if (LN(chip8->opcode) == 0x3) { // 8XY3: sets Vx ^= Vy
+      chip8->V[Vx(chip8->opcode)] ^= chip8->V[Vy(chip8->opcode)];
+    } else if (LN(chip8->opcode) == 0x4) { // 8XY4: sets Vx += Vy, VF = 1 if OF
+      chip8->V[Vx(chip8->opcode)] += chip8->V[Vy(chip8->opcode)];
+      chip8->V[0xF] =
+          (chip8->V[Vy(chip8->opcode)] > chip8->V[Vx(chip8->opcode)]) ? 1 : 0;
+    } else if (LN(chip8->opcode) == 0x5) { // 8XY5: sets Vx -= Vy, VF = 0 if UF
+      chip8->V[Vx(chip8->opcode)] -= chip8->V[Vy(chip8->opcode)];
+      chip8->V[0xF] =
+          (chip8->V[Vx(chip8->opcode)] >= chip8->V[Vy(chip8->opcode)]) ? 1 : 0;
+    } else if (LN(chip8->opcode) ==
+               0x6) { // 8XY6: VF = LSB, right shifts Vx by 1
+      chip8->V[0xF] = LN(chip8->V[Vx(chip8->opcode)]);
+      chip8->V[Vx(chip8->opcode)] >>= 1;
+    } else if (LN(chip8->opcode) == 0x7) { // 8XY7: Vx = Vy - Vx, VF = 0 if UF
+      chip8->V[0xF] =
+          (chip8->V[Vy(chip8->opcode)] >= chip8->V[Vx(chip8->opcode)]) ? 1 : 0;
       chip8->V[Vx(chip8->opcode)] =
-          chip8->V[Vy(chip8->opcode)];
-    } else if (LN(chip8->opcode) == 1) { // 8XY1: sets Vx |= Vy
+          chip8->V[Vy(chip8->opcode)] - chip8->V[Vx(chip8->opcode)];
+    } else if (LN(chip8->opcode) ==
+               0xE) { // 8XYE: VF = MSB, left shifts Vx by 1
+      chip8->V[0xF] = HN(chip8->V[Vx(chip8->opcode)]);
+      chip8->V[Vx(chip8->opcode)] <<= 1;
+    }
+    chip8->pc += 2;
+    break;
 
-    } else if (LN(chip8->opcode) == 2) { // 8XY2: sets Vx &= Vy
-    } else if (LN(chip8->opcode) == 3) { // 8XY3: sets Vx ^= Vy
-    } else if (LN(chip8->opcode) == 4) { // 8XY4: sets Vx += Vy
-    } else if (LN(chip8->opcode) == 5) {
+  case 0x9: // 9XY0: skips next instruction if Vx != Vy
+    if (chip8->V[Vx(chip8->opcode)] != chip8->V[Vy(chip8->opcode)]) {
+      chip8->pc += 4;
+    } else {
+      chip8->pc += 2;
     }
     break;
 
+  case 0xA: // ANNN: sets I to NNN
+    chip8->I = NNN(chip8->opcode);
+    chip8->pc += 2;
+    break;
+
+  case 0xB: // BNNN: jumps to address NNN + V0
+    chip8->pc = NNN(chip8->opcode) + chip8->V[0x0];
+    break;
+
+  case 0xC: // CXNN: sets Vx = rand(0, 255) & NN
+    chip8->V[Vx(chip8->opcode)] = (rand() % 255 + 1) & NN(chip8->opcode);
+    chip8->pc += 2;
+    break;
+
+  case 0xD: // DXYN: draw sprite at (Vx, Vy), w = 8, h = n
+    /* draw_sprite(chip8->V[Vx(chip8->opcode)], chip8->V[Vy(chip8->opcode)], */
+    /* LN(chip8->opcode)); */
+    chip8->pc += 2;
+    break;
+
+  case 0xE:
+
+  case 0xF:
+
+  default:
+    fprintf(stderr, "Error: Unknown opcode %X\n", chip8->opcode);
+      chip8->pc += 2;
+    break;
+
     // timers
-    /* if (delay_timer > 0) */
-    /*   --delay_timer; */
-    /* if (sound_timer > 0) { */
-    /*   if (sound_timer == 1) */
+    /* if (chip8->delay_timer > 0) */
+    /*   --chip8->delay_timer; */
+    /* if (chip8->sound_timer > 0) { */
+    /*   if (chip8->sound_timer == 1) */
     /*     play_sound(); */
-    /*   --sound_timer; */
+    /*   --chip8->sound_timer; */
     /* } */
   }
 }
