@@ -93,30 +93,34 @@ int load_rom(Chip8 *chip8, char *rom_path) {
   return OK;
 }
 
-/* void execute_opcode() { */
-/*     // fetch opcode */
-/*     opcode = (memory[pc] << 8) + memory[pc + 1]; */
-/*     // decode opcode */
-/*     switch (opcode & 0xF000) { */
-/*         // execute opcode */
-/*         case 0x0: */
-/*             if (opcode == 0x00E0) */
-/*                 clear_display(); */
-/*             elseif (opcode == 0x00EE) */
-/*                 // return from subroutine */
-/*         case 0x1: */
-/*         /1* . *1/ */
-/*         /1* . *1/ */
-/*         /1* . *1/ */
-/*         case 0xF: */
-/*     } */
+void execute_opcode(Chip8 *chip8) {
+  // Get the opcode from memory by combining the current (right padding by 8
+  // bits) and next byte relative to the PC
 
-/*     // timers */
-/*     if (delay_timer > 0) */
-/*         --delay_timer; */
-/*     if (sound_timer > 0) { */
-/*         if (sound_timer == 1) */
-/*             play_sound(); */
-/*         --sound_timer; */
-/*     } */
-/* } */
+  chip8->opcode = (chip8->memory[chip8->pc] << 8) + chip8->memory[chip8->pc + 1];
+
+  // Decode the opcode and execute the instruction
+
+  switch (chip8->opcode & HIGH_NIBBLE_BITMASK) {
+  // execute opcode
+  case 0x0:
+    if (opcode == 0x00E0)
+      clear_display();
+  elseif(opcode == 0x00EE)
+      // return from subroutine
+      case 0x1:
+  /* . */
+  /* . */
+  /* . */
+  case 0xF:
+  }
+
+  // timers
+  if (delay_timer > 0)
+    --delay_timer;
+  if (sound_timer > 0) {
+    if (sound_timer == 1)
+      play_sound();
+    --sound_timer;
+  }
+}
