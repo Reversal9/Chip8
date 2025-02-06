@@ -102,7 +102,7 @@ void execute_opcode(Chip8 *chip8) {
 
   // Decode the opcode and execute the instruction
 
-  switch (chip8->opcode & HIGH_NIBBLE_BITMASK) {
+  switch (HN(chip8->opcode)) {
   case 0x0:
     if (chip8->opcode == 0x00E0) { // 00E0: clears the screen
       /* clear_display(); */
@@ -113,17 +113,17 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x1: // 1NNN: jump to address NNN
-    chip8->pc = chip8->opcode & MEMORY_ADDRESS_BITMASK;
+    chip8->pc = NNN(chip8->opcode);
     break;
 
   case 0x2: // 2NNN: calls subroutine at NNN
     /* push(&(chip8->stack), chip8->pc); */
-    chip8->pc = chip8->opcode & MEMORY_ADDRESS_BITMASK;
+    chip8->pc = NNN(chip8->opcode);
     break;
 
   case 0x3: // 3XNN: skips next instruction if Vx == NN
-    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] ==
-        (chip8->opcode & NN_BITMASK)) {
+    if (chip8->V[Vx(chip8->opcode)] ==
+        NN(chip8->opcode)) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -131,8 +131,8 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x4: // 4XNN: skips next instruction if Vx != NN
-    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] !=
-        (chip8->opcode & NN_BITMASK)) {
+    if (chip8->V[Vx(chip8->opcode)] !=
+        NN(chip8->opcode)) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -140,8 +140,8 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x5: // 5XY0: skips next instruction if Vx == Vy
-    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] ==
-        chip8->V[chip8->opcode & REGISTER_Y_BITMASK]) {
+    if (chip8->V[Vx(chip8->opcode)] ==
+        chip8->V[Vy(chip8->opcode)]) {
       chip8->pc += 4;
     } else {
       chip8->pc += 2;
@@ -149,24 +149,24 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x6: // 6XNN: sets Vx to NN
-    chip8->V[chip8->opcode & REGISTER_X_BITMASK] = chip8->opcode & NN_BITMASK;
+    chip8->V[Vx(chip8->opcode)] = NN(chip8->opcode);
     chip8->pc += 2;
     break;
 
   case 0x7: // 7XNN: adds NN to Vx
-    chip8->V[chip8->opcode & REGISTER_X_BITMASK] += chip8->opcode & NN_BITMASK;
+    chip8->V[Vx(chip8->opcode)] += NN(chip8->opcode);
     break;
 
   case 0x8:
-    if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 0) { // 8XY0: sets Vx = Vy
-      chip8->V[chip8->opcode & REGISTER_X_BITMASK] =
-          chip8->V[chip8->opcode & REGISTER_Y_BITMASK];
-    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 1) { // 8XY1: sets Vx |= Vy
+    if (LN(chip8->opcode) == 0) { // 8XY0: sets Vx = Vy
+      chip8->V[Vx(chip8->opcode)] =
+          chip8->V[Vy(chip8->opcode)];
+    } else if (LN(chip8->opcode) == 1) { // 8XY1: sets Vx |= Vy
 
-    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 2) { // 8XY2: sets Vx &= Vy
-    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 3) { // 8XY3: sets Vx ^= Vy
-    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 4) { // 8XY4: sets Vx += Vy
-    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 5) {
+    } else if (LN(chip8->opcode) == 2) { // 8XY2: sets Vx &= Vy
+    } else if (LN(chip8->opcode) == 3) { // 8XY3: sets Vx ^= Vy
+    } else if (LN(chip8->opcode) == 4) { // 8XY4: sets Vx += Vy
+    } else if (LN(chip8->opcode) == 5) {
     }
     break;
 

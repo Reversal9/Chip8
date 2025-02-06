@@ -23,12 +23,19 @@
 #define KEYPAD_SIZE (16)  // 16 keys for input map
 
 // Bit manipulation macros
-#define HIGH_NIBBLE_BITMASK (0xF000) // retrieves the first 4 MSB
-#define LOW_NIBBLE_BITMASK (0x000F) // retrieves the last 4 MSB
-#define MEMORY_ADDRESS_BITMASK (0x0FFF) // retrieves 12 LSB
-#define REGISTER_X_BITMASK (0x0F00) // retrieves second nibble
-#define REGISTER_Y_BITMASK (0x00F0) // retrieves third nibble
-#define NN_BITMASK (0x00FF) // retrieves last byte
+/* #define HIGH_NIBBLE_BITMASK (0xF000)    // retrieves the first 4 MSB */
+/* #define LOW_NIBBLE_BITMASK (0x000F)     // retrieves the last 4 MSB */
+/* #define MEMORY_ADDRESS_BITMASK (0x0FFF) // retrieves 12 LSB */
+/* #define REGISTER_X_BITMASK (0x0F00)     // retrieves second nibble */
+/* #define REGISTER_Y_BITMASK (0x00F0)     // retrieves third nibble */
+/* #define NN_BITMASK (0x00FF)             // retrieves last byte */
+
+#define HN(opcode) (opcode & 0xF000) // first 4 MSB
+#define LN(opcode) (opcode & 0x000F) // last 4 MSB
+#define NN(opcode) (opcode & 0x00FF) // last 8 MSB
+#define NNN(opcode) (opcode & 0x0FFF) // last 12 MSB (memory address)
+#define Vx(opcode) (opcode & 0x0F00) // second nibble
+#define Vy(opcode) (opcode & 0x00F0) // third nibble
 
 // Chip8 struct
 typedef struct {
