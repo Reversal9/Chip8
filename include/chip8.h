@@ -24,6 +24,11 @@
 
 // Bit manipulation macros
 #define HIGH_NIBBLE_BITMASK (0xF000) // retrieves the first 4 MSB
+#define LOW_NIBBLE_BITMASK (0x000F) // retrieves the last 4 MSB
+#define MEMORY_ADDRESS_BITMASK (0x0FFF) // retrieves 12 LSB
+#define REGISTER_X_BITMASK (0x0F00) // retrieves second nibble
+#define REGISTER_Y_BITMASK (0x00F0) // retrieves third nibble
+#define NN_BITMASK (0x00FF) // retrieves last byte
 
 // Chip8 struct
 typedef struct {

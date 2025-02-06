@@ -97,30 +97,86 @@ void execute_opcode(Chip8 *chip8) {
   // Get the opcode from memory by combining the current (right padding by 8
   // bits) and next byte relative to the PC
 
-  chip8->opcode = (chip8->memory[chip8->pc] << 8) + chip8->memory[chip8->pc + 1];
+  chip8->opcode =
+      (chip8->memory[chip8->pc] << 8) + chip8->memory[chip8->pc + 1];
 
   // Decode the opcode and execute the instruction
 
   switch (chip8->opcode & HIGH_NIBBLE_BITMASK) {
-  // execute opcode
   case 0x0:
-    if (opcode == 0x00E0)
-      clear_display();
-  elseif(opcode == 0x00EE)
-      // return from subroutine
-      case 0x1:
-  /* . */
-  /* . */
-  /* . */
-  case 0xF:
-  }
+    if (chip8->opcode == 0x00E0) { // 00E0: clears the screen
+      /* clear_display(); */
+      chip8->pc += 2;
+    } else if (chip8->opcode == 0x00EE) { // 00EE: return from subroutine
+      /* chip8->pc = chip8->pop(chip8->stack); */
+    }
+    break;
 
-  // timers
-  if (delay_timer > 0)
-    --delay_timer;
-  if (sound_timer > 0) {
-    if (sound_timer == 1)
-      play_sound();
-    --sound_timer;
+  case 0x1: // 1NNN: jump to address NNN
+    chip8->pc = chip8->opcode & MEMORY_ADDRESS_BITMASK;
+    break;
+
+  case 0x2: // 2NNN: calls subroutine at NNN
+    /* push(&(chip8->stack), chip8->pc); */
+    chip8->pc = chip8->opcode & MEMORY_ADDRESS_BITMASK;
+    break;
+
+  case 0x3: // 3XNN: skips next instruction if Vx == NN
+    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] ==
+        (chip8->opcode & NN_BITMASK)) {
+      chip8->pc += 4;
+    } else {
+      chip8->pc += 2;
+    }
+    break;
+
+  case 0x4: // 4XNN: skips next instruction if Vx != NN
+    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] !=
+        (chip8->opcode & NN_BITMASK)) {
+      chip8->pc += 4;
+    } else {
+      chip8->pc += 2;
+    }
+    break;
+
+  case 0x5: // 5XY0: skips next instruction if Vx == Vy
+    if (chip8->V[chip8->opcode & REGISTER_X_BITMASK] ==
+        chip8->V[chip8->opcode & REGISTER_Y_BITMASK]) {
+      chip8->pc += 4;
+    } else {
+      chip8->pc += 2;
+    }
+    break;
+
+  case 0x6: // 6XNN: sets Vx to NN
+    chip8->V[chip8->opcode & REGISTER_X_BITMASK] = chip8->opcode & NN_BITMASK;
+    chip8->pc += 2;
+    break;
+
+  case 0x7: // 7XNN: adds NN to Vx
+    chip8->V[chip8->opcode & REGISTER_X_BITMASK] += chip8->opcode & NN_BITMASK;
+    break;
+
+  case 0x8:
+    if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 0) { // 8XY0: sets Vx = Vy
+      chip8->V[chip8->opcode & REGISTER_X_BITMASK] =
+          chip8->V[chip8->opcode & REGISTER_Y_BITMASK];
+    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 1) { // 8XY1: sets Vx |= Vy
+
+    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 2) { // 8XY2: sets Vx &= Vy
+    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 3) { // 8XY3: sets Vx ^= Vy
+    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 4) { // 8XY4: sets Vx += Vy
+    } else if ((chip8->opcode & LOW_NIBBLE_BITMASK) == 5) {
+    }
+    break;
+
+    // timers
+    /* if (delay_timer > 0) */
+    /*   --delay_timer; */
+    /* if (sound_timer > 0) { */
+    /*   if (sound_timer == 1) */
+    /*     play_sound(); */
+    /*   --sound_timer; */
+    /* } */
   }
 }
