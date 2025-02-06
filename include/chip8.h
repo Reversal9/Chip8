@@ -3,7 +3,13 @@
 
 // Dependencies
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+
+// Error codes
+#define OK (0)
+#define FILE_READ_ERR (-1)
+#define INVALID_ROM_ERR (-2)
 
 // Constants
 #define MEMORY_SIZE (4096)
@@ -18,7 +24,7 @@
 
 // Chip8 struct
 typedef struct {
-  uint16_t memory[MEMORY_SIZE]; // 4KB memory from 0x000 to 0xFFF
+  uint8_t memory[MEMORY_SIZE]; // 4KB memory from 0x000 to 0xFFF
   uint8_t V[NUM_REGISTERS];                // 16 general purpose 8-bit registers V0 to VF
   uint16_t I;                   // index register, used in memory operations
   uint16_t pc;                  // program counter
@@ -29,7 +35,7 @@ typedef struct {
   uint8_t delay_timer;          // set and read, counts to 0 at 60 Hz
   uint8_t sound_timer;          // read, beeps when non-zero at 60 Hz
   uint8_t gfx[MAX_WIDTH * MAX_HEIGHT]; // graphics of chip8 are black (1) and white (0), screen has MAX_WIDTH by MAX_HEIGHT pixels
-  uint8_t keypad[KEYPAD_SIZE];
+  uint8_t keypad[KEYPAD_SIZE]; // stores current state of each key (bitmap)
 } Chip8;
 
 // Chip8 fontset (0 to F) to be preloaded

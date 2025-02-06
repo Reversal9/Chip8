@@ -52,10 +52,45 @@ void init_chip8(Chip8 *chip8) {
   chip8->sound_timer = 0;
 }
 
-void load_rom(Chip8 *chip8, char *rom_path) {
-  // read file into memory
-  // starting from location 512Kb
-  // or 0x200 in hex
+int load_rom(Chip8 *chip8, char *rom_path) {
+  // Read binary rom file
+
+  FILE *fp = fopen(rom_path, "rb");
+
+  // Check fp for NULL when unable to read file
+
+  if (fp == NULL) {
+    fprintf(stderr, "Error: Unable to read file %s\n", rom_path);
+  }
+
+  // Get each byte inside the rom file and store it in memory starting from
+  // 0x200
+
+  uint8_t byte = 0;
+  int i = 0x200;
+
+  // Read one byte each time (char) and place it in memory
+
+  while ((byte = fscanf(fp, "%c", &byte)) == 1) {
+    // Check for memory overflow, when ROM is formatted incorrectly (too large)
+
+    if (i >= MEMORY_SIZE) {
+      fprintf(stderr, "Error: ROM too large to fit in memory\n");
+      fclose(fp);
+      fp = NULL;
+
+      return INVALID_ROM_ERR;
+    }
+
+    chip8->memory[i++] = byte;
+  }
+
+  // Close file stream
+
+  fclose(fp);
+  fp = NULL;
+
+  return OK;
 }
 
 /* void execute_opcode() { */
