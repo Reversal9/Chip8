@@ -1,4 +1,8 @@
 #include "../include/chip8.h"
+#include "../include/display.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Chip8 fontset that includes characters 0 to F, 5 bytes long each (8 x 5
 // pixels)
@@ -211,8 +215,8 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0xD: // DXYN: draw sprite at (Vx, Vy), w = 8, h = n
-    /* draw_sprite(chip8->V[Vx(chip8->opcode)], chip8->V[Vy(chip8->opcode)], */
-    /* LN(chip8->opcode)); */
+    draw_sprite(chip8, chip8->V[Vx(chip8->opcode)], chip8->V[Vy(chip8->opcode)],
+    LN(chip8->opcode));
     chip8->pc += 2;
     break;
 

@@ -1,7 +1,7 @@
 #include "../include/main.h"
+#include "../include/display.h"
 #include "../include/chip8.h"
 #include "../include/input.h"
-#include "../include/display.h"
 
 int main(int argc, char *argv[]) {
   Chip8 chip8 = {0};
@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 
   init_chip8(&chip8);
   /* init_input(); */
-  /* init_graphics(); */
+  init_display(MAX_WIDTH, MAX_HEIGHT);
 
   load_rom(&chip8, ROM_PATH);
 
