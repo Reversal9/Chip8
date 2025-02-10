@@ -2,27 +2,44 @@
 #include "../include/chip8.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
 #include <stdio.h>
 
 SDL_Window *g_window = NULL;
-SDL_Surface *g_screen_surface = NULL;
+SDL_Renderer *g_renderer = NULL;
+SDL_Texture *g_texture = NULL;
 bool g_is_running = true;
 
-void update_display() {
+void update_display(Chip8 *chip8) {
   if (g_window == NULL) {
     return;
   }
 
-  SDL_UpdateWindowSurface(g_window);
+  int texture_pitch = 0;
+  void *texture_pixels = NULL;
+
+  if (SDL_LockTexture(g_texture, NULL, &texture_pixels, &texture_pitch) != 0) {
+    printf("Unable to lock texture: %s", SDL_GetError());
+    return;
+  }
+
+  memcpy(texture_pixels, chip8->gfx, texture_pitch * SCREEN_HEIGHT);
+
+  SDL_UnlockTexture(g_texture);
+  SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+  SDL_RenderPresent(g_renderer);
 }
 
-void clear_display() {
+void clear_display(Chip8 *chip8) {
   if (g_window == NULL) {
     return;
   }
 
-  SDL_FillRect(g_screen_surface, NULL,
-               SDL_MapRGB(g_screen_surface->format, 0xFF, 0xFF, 0xFF));
+  for (int r = 0; r < SCREEN_HEIGHT; r++) {
+    for (int c = 0; c < SCREEN_WIDTH; c++) {
+      chip8->gfx[r][c] = WHITE_PIXEL;
+    }
+  }
 }
 
 void draw_sprite(Chip8 *chip8, int Vx, int Vy, int N) {
@@ -30,14 +47,49 @@ void draw_sprite(Chip8 *chip8, int Vx, int Vy, int N) {
     return;
   }
 
+  bool has_flipped = false;
+
   // TODO
+  for (int i = 0; i < N; i++) {
+    // Read a byte from memory
+
+    uint8_t byte = chip8->memory[chip8->I + i]; // each byte has 8 bits
+
+    for (int j = 0; j < SPRITE_WIDTH; j++) {
+      // Get position of the pixel to draw
+
+      int x = Vx + i;
+      int y = Vy + j;
+
+      // Get the pixel value
+
+      int pixel = (byte >> (SPRITE_WIDTH - 1 - i)) & 0x1;
+      int current_pixel = chip8->gfx[x][y];
+
+      // XOR the pixel values
+
+      chip8->gfx[x][y] ^= pixel;
+
+      // Check if pixel was flipped from SET to UNSET
+
+      if ((current_pixel == SET) && (chip8->gfx[x][y] == UNSET)) {
+        has_flipped = true;
+      }
+    }
+
+    if (has_flipped) {
+      chip8->V[0xF] = 1;
+    } else {
+      chip8->V[0xF] = 0;
+    }
+  }
 }
 
-int init_display(int width, int height) {
+int init_display(Chip8 *chip8, int width, int height) {
 
   // Initialize SDL video subsystem
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     return SDL_INIT_ERROR;
   }
@@ -53,28 +105,34 @@ int init_display(int width, int height) {
     return SDL_WINDOW_ERROR;
   }
 
-  // Get the window surface
+  // Create the renderer for the window
 
-  g_screen_surface = SDL_GetWindowSurface(g_window);
+  g_renderer = SDL_CreateRenderer(
+      g_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+  if (g_renderer == NULL) {
+    printf("Unable to create renderer: %s", SDL_GetError());
+    return SDL_RENDERER_ERROR;
+  }
+
+  // Create the texture for the renderer
+
+  g_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA32,
+                                SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
+                                SCREEN_HEIGHT);
+
+  if (g_texture == NULL) {
+    printf("Unable to create texture: %s", SDL_GetError());
+    return SDL_TEXTURE_ERROR;
+  }
 
   // Fill the surface white
 
-  clear_display();
+  clear_display(chip8);
 
   // Update the surface
 
-  update_display();
-
-  // Hack to get window to stay up
-
-  SDL_Event e;
-  while (g_is_running) {
-    while (SDL_PollEvent(&e)) {
-      if (e.type == SDL_QUIT) {
-        g_is_running = false;
-      }
-    }
-  }
+  update_display(chip8);
 
   return OK;
 }

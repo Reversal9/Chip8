@@ -7,10 +7,10 @@
 #include <stdbool.h>
 
 // Function prototypes
-void update_display();
-void clear_display();
+void update_display(Chip8 *chip8);
+void clear_display(Chip8 *chip8);
 void draw_sprite(Chip8 *chip8, int Vx, int Vy, int N);
-int init_display(int width, int height);
+int init_display(Chip8 *chip8, int width, int height);
 void close_display();
 
 // Global variables
@@ -28,5 +28,13 @@ extern bool g_is_running;
 // Screen dimensions of Chip-8
 #define SCREEN_WIDTH (64)
 #define SCREEN_HEIGHT (32)
+
+// Color codes
+#define WHITE_PIXEL (0xFF)
+#define BLACK_PIXEL (0x00)
+
+// Pixels
+#define UNSET (0)
+#define SET (1)
 
 #endif // DISPLAY_H

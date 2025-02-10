@@ -19,6 +19,7 @@
 #define TIMER_SPEED (60)  // rate of timer decrement measured in Hz
 #define CLOCK_SPEED (600) // rate that instructions are executed in Hz
 #define KEYPAD_SIZE (16)  // 16 keys for input map
+#define SPRITE_WIDTH (8)  // width of sprite in pixels
 
 // Bit manipulation macros
 #define HN(opcode) (opcode & 0xF000)  // first 4 MSB
@@ -41,8 +42,8 @@ typedef struct {
               // empty index [0, STACK_SIZE - 1]
   uint8_t delay_timer; // set and read, counts to 0 at 60 Hz
   uint8_t sound_timer; // read, beeps when non-zero at 60 Hz
-  uint8_t gfx[MAX_WIDTH *
-              MAX_HEIGHT];     // graphics of chip8 are black (1) and white (0),
+  uint8_t gfx[MAX_WIDTH]
+             [MAX_HEIGHT];     // graphics of chip8 are black (1) and white (0),
                                // screen has MAX_WIDTH by MAX_HEIGHT pixels
   uint8_t keypad[KEYPAD_SIZE]; // stores current state of each key (bitmap)
 } Chip8;

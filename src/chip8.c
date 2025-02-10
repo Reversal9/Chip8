@@ -109,10 +109,10 @@ void execute_opcode(Chip8 *chip8) {
   switch (HN(chip8->opcode)) {
   case 0x0:
     if (chip8->opcode == 0x00E0) { // 00E0: clears the screen
-      /* clear_display(); */
+      clear_display(chip8);
       chip8->pc += 2;
     } else if (chip8->opcode == 0x00EE) { // 00EE: return from subroutine
-      /* chip8->pc = chip8->pop(chip8->stack); */
+      chip8->pc = chip8->stack[--(chip8->sp)];
     }
     break;
 
@@ -121,7 +121,7 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0x2: // 2NNN: calls subroutine at NNN
-    /* push(&(chip8->stack), chip8->pc); */
+    chip8->stack[(chip8->sp)++] = chip8->pc;
     chip8->pc = NNN(chip8->opcode);
     break;
 
