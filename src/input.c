@@ -1,16 +1,12 @@
 #include "../include/input.h"
 
-// Array that stores the state of each key (pressed = true)
-
-bool g_chip8_keys[CHIP8_KEY_COUNT] = {0};
-
 /*
  * This function maps keyboard input to the chip8 keyboard, returning the index
  * of the key pressed.
  */
 
-void init_input() {
-  memset(g_chip8_keys, 0, sizeof(g_chip8_keys));
+void init_input(Chip8 *chip8) {
+  memset(chip8->keypad, 0, sizeof(chip8->keypad));
 }
 
 int map_sdl_key(SDL_Keycode key) {

@@ -1,5 +1,6 @@
 #include "../include/chip8.h"
 #include "../include/display.h"
+#include "../include/input.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -221,8 +222,80 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0xE:
+    if (NN(chip8->opcode) == 0x9E) { // EX9E: skips next instruction if key[Vx]
+      if (chip8->keypad[chip8->V[Vx(chip8->opcode)]]) {
+        chip8->pc += 4;
+      } else {
+        chip8->pc += 2;
+      }
+    } else if (NN(chip8->opcode) ==
+               0xA1) { // EXA1: skips next instruction if !key[Vx]
+      if (!chip8->keypad[chip8->V[Vx(chip8->opcode)]]) {
+        chip8->pc += 4;
+      } else {
+        chip8->pc += 2;
+      }
+    }
+    break;
 
   case 0xF:
+    if (NN(chip8->opcode) == 0x07) { // FX07: sets Vx = delay_timer
+      chip8->V[Vx(chip8->opcode)] = chip8->delay_timer;
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) ==
+               0x0A) { // FX0A: waits for key press and stores in Vx
+      bool key_pressed = false;
+
+      // Go through each key state
+
+      for (int i = 0; i < KEYPAD_SIZE; i++) {
+        if (chip8->keypad[i]) {
+          chip8->V[Vx(chip8->opcode)] = i;
+          key_pressed = true;
+        }
+      }
+
+      // Do not increment program counter (blocking operation)
+
+      if (!key_pressed) {
+        return;
+      }
+
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) == 0x15) { // FX15: sets delay_timer = Vx
+      chip8->delay_timer = chip8->V[Vx(chip8->opcode)];
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) == 0x18) { // FX18: sets sound_timer = Vx
+      chip8->sound_timer = chip8->V[Vx(chip8->opcode)];
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) ==
+               0x1E) { // FX1E: sets I = I + Vx, VF = 1 if overflow (dependent)
+      chip8->I += chip8->V[Vx(chip8->opcode)];
+      /* chip8->V[0xF] = (chip8->I + chip8->V[Vx(chip8->opcode)] > 0xFFF) ? 1 :
+       * 0; */
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) ==
+               0x29) { // FX29: sets I to location of sprite for digit Vx
+      chip8->I = chip8->V[Vx(chip8->opcode) + 0x50];
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) ==
+               0x33) { // FX33: stores BCD representation of Vx in memory
+      chip8->memory[chip8->I] = chip8->V[Vx(chip8->opcode)] / 100;
+      chip8->memory[chip8->I + 1] = (chip8->V[Vx(chip8->opcode)] / 10) % 10;
+      chip8->memory[chip8->I + 2] = (chip8->V[Vx(chip8->opcode)] / 100) % 10;
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) == 0x55) { // FX55: stores V0 to Vx in memory
+      for (int i = 0x0; i <= Vx(chip8->opcode); i++) {
+        chip8->memory[chip8->I + i] = chip8->V[i];
+      }
+      chip8->pc += 2;
+    } else if (NN(chip8->opcode) == 0x65) { // FX66: fills v0 to Vx from memory
+      for (int i = 0x0; i <= Vx(chip8->opcode); i++) {
+        chip8->V[i] = chip8->memory[chip8->I + i];
+      }
+      chip8->pc += 2;
+    }
+    break;
 
   default:
     fprintf(stderr, "Error: Unknown opcode %X\n", chip8->opcode);

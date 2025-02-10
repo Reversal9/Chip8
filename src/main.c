@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
   Chip8 chip8 = {0};
 
   init_chip8(&chip8);
-  init_input();
+  init_input(&chip8);
   init_display(&chip8, MAX_WIDTH, MAX_HEIGHT);
   init_audio();
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
           // Set the state according to whether the key is pressed down or
           // released
 
-          g_chip8_keys[chip8_key] = (e.type == SDL_KEYDOWN);
+          chip8.keypad[chip8_key] = (e.type == SDL_KEYDOWN);
         }
       }
     }
