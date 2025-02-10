@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
 
   init_chip8(&chip8);
   init_input(&chip8);
-  init_display(&chip8, MAX_WIDTH, MAX_HEIGHT);
+  init_display(&chip8, MAX_WIDTH * SCALE_FACTOR, MAX_HEIGHT * SCALE_FACTOR);
   init_audio();
 
   if (load_rom(&chip8, ROM_PATH) == INVALID_ROM_ERR) {

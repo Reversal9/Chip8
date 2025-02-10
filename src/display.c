@@ -27,18 +27,29 @@ void update_display(Chip8 *chip8) {
     return;
   }
 
-  int texture_pitch = 0;
-  void *texture_pixels = NULL;
+  // Set the draw color to black (R=0, G=0, B=0, A=255)
+  SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
 
-  if (SDL_LockTexture(g_texture, NULL, &texture_pixels, &texture_pitch) != 0) {
-    printf("Unable to lock texture: %s", SDL_GetError());
-    return;
+  // Clear renderer (erase previous frame)
+
+  SDL_RenderClear(g_renderer);
+
+  for (int y = 0; y < MAX_HEIGHT; y++) {
+    for (int x = 0; x < MAX_WIDTH; x++) {
+      // Check if pixel is set
+
+      if (chip8->gfx[y][x] == 1) {
+        SDL_Rect rect = {x * SCALE_FACTOR, y * SCALE_FACTOR, SCALE_FACTOR,
+                         SCALE_FACTOR};
+
+        // Set color to white
+
+        SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(g_renderer, &rect);
+      }
+    }
   }
 
-  memcpy(texture_pixels, chip8->gfx, texture_pitch * SCREEN_HEIGHT);
-
-  SDL_UnlockTexture(g_texture);
-  SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
   SDL_RenderPresent(g_renderer);
 }
 
@@ -47,9 +58,9 @@ void clear_display(Chip8 *chip8) {
     return;
   }
 
-  for (int r = 0; r < SCREEN_HEIGHT; r++) {
-    for (int c = 0; c < SCREEN_WIDTH; c++) {
-      chip8->gfx[r][c] = WHITE_PIXEL;
+  for (int r = 0; r < MAX_HEIGHT; r++) {
+    for (int c = 0; c < MAX_WIDTH; c++) {
+      chip8->gfx[r][c] = UNSET;
     }
   }
 }
@@ -109,8 +120,8 @@ int init_display(Chip8 *chip8, int width, int height) {
   // Create the window to display the CHIP-8 screen
 
   g_window = SDL_CreateWindow("CHIP-8", SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
-                              SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+                              SDL_WINDOWPOS_UNDEFINED, MAX_WIDTH, MAX_HEIGHT,
+                              SDL_WINDOW_SHOWN);
 
   if (g_window == NULL) {
     printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -129,9 +140,9 @@ int init_display(Chip8 *chip8, int width, int height) {
 
   // Create the texture for the renderer
 
-  g_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA32,
-                                SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
-                                SCREEN_HEIGHT);
+  g_texture =
+      SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA32,
+                        SDL_TEXTUREACCESS_STREAMING, MAX_WIDTH, MAX_HEIGHT);
 
   if (g_texture == NULL) {
     printf("Unable to create texture: %s", SDL_GetError());

@@ -34,12 +34,7 @@ extern SDL_AudioSpec g_audio_spec;
 #define SDL_AUDIO_ERROR (-5)
 
 // Screen dimensions of Chip-8
-#define SCREEN_WIDTH (64)
-#define SCREEN_HEIGHT (32)
-
-// Color codes
-#define WHITE_PIXEL (0xFF)
-#define BLACK_PIXEL (0x00)
+#define SCALE_FACTOR (10)
 
 // Pixels
 #define UNSET (0)
