@@ -1,5 +1,6 @@
 #include "../include/chip8.h"
 #include "../include/display.h"
+#include <SDL2/SDL_timer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,7 +103,12 @@ void execute_opcode(Chip8 *chip8) {
   // bits) and next byte relative to the PC
 
   chip8->opcode =
-      (chip8->memory[chip8->pc] << 8) + chip8->memory[chip8->pc + 1];
+      (chip8->memory[chip8->pc] << 8) | chip8->memory[chip8->pc + 1];
+
+  SDL_Delay(1000);
+  printf("Running opcode: %.4X\n", chip8->opcode);
+  printf("High nibble: %.1X\n", HN(chip8->opcode));
+  printf("%.1X\n", 0xA);
 
   /* printf("Executing opcode: %X\n", chip8->opcode); */
 
@@ -112,6 +118,7 @@ void execute_opcode(Chip8 *chip8) {
   case 0x0:
     if (chip8->opcode == 0x00E0) { // 00E0: clears the screen
       clear_display(chip8);
+      g_draw_flag = true;
       chip8->pc += 2;
     } else if (chip8->opcode == 0x00EE) { // 00EE: return from subroutine
       chip8->pc = chip8->stack[--(chip8->sp)];
@@ -220,6 +227,7 @@ void execute_opcode(Chip8 *chip8) {
   case 0xD: // DXYN: draw sprite at (Vx, Vy), w = 8, h = n
     draw_sprite(chip8, chip8->V[Vx(chip8->opcode)], chip8->V[Vy(chip8->opcode)],
                 LN(chip8->opcode));
+    g_draw_flag = true;
     chip8->pc += 2;
     break;
 

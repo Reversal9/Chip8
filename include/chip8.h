@@ -22,12 +22,12 @@
 #define SPRITE_WIDTH (8)  // width of sprite in pixels
 
 // Bit manipulation macros
-#define HN(opcode) (opcode & 0xF000)  // first 4 MSB
-#define LN(opcode) (opcode & 0x000F)  // last 4 MSB
-#define NN(opcode) (opcode & 0x00FF)  // last 8 MSB
-#define NNN(opcode) (opcode & 0x0FFF) // last 12 MSB (memory address)
-#define Vx(opcode) (opcode & 0x0F00)  // second nibble
-#define Vy(opcode) (opcode & 0x00F0)  // third nibble
+#define HN(opcode) ((opcode & 0xF000) >> 12) // first 4 MSB
+#define LN(opcode) (opcode & 0x000F)         // last 4 MSB
+#define NN(opcode) (opcode & 0x00FF)         // last 8 MSB
+#define NNN(opcode) (opcode & 0x0FFF)        // last 12 MSB (memory address)
+#define Vx(opcode) ((opcode & 0x0F00) >> 2)  // second nibble
+#define Vy(opcode) ((opcode & 0x00F0) >> 1)  // third nibble
 
 // Chip8 struct
 typedef struct {

@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
     // Refresh display if flag is set
     if (g_draw_flag) {
       update_display(&chip8);
+      g_draw_flag = false;
     }
 
     // Play beep if flag is set
