@@ -105,13 +105,6 @@ void execute_opcode(Chip8 *chip8) {
   chip8->opcode =
       (chip8->memory[chip8->pc] << 8) | chip8->memory[chip8->pc + 1];
 
-  SDL_Delay(1000);
-  printf("Running opcode: %.4X\n", chip8->opcode);
-  printf("High nibble: %.1X\n", HN(chip8->opcode));
-  printf("%.1X\n", 0xA);
-
-  /* printf("Executing opcode: %X\n", chip8->opcode); */
-
   // Decode the opcode and execute the instruction
 
   switch (HN(chip8->opcode)) {

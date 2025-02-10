@@ -75,7 +75,6 @@ void draw_sprite(Chip8 *chip8, int Vx, int Vy, int N) {
   for (int i = 0; i < N; i++) {
     // Read a byte from memory
     uint8_t byte = chip8->memory[chip8->I + i]; // each byte has 8 bits
-    printf("byte: %d\n", byte);
 
     for (int j = 0; j < SPRITE_WIDTH; j++) {
       // Get position of the pixel to draw
