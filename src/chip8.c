@@ -216,7 +216,7 @@ void execute_opcode(Chip8 *chip8) {
 
   case 0xD: // DXYN: draw sprite at (Vx, Vy), w = 8, h = n
     draw_sprite(chip8, chip8->V[Vx(chip8->opcode)], chip8->V[Vy(chip8->opcode)],
-    LN(chip8->opcode));
+                LN(chip8->opcode));
     chip8->pc += 2;
     break;
 
@@ -226,16 +226,20 @@ void execute_opcode(Chip8 *chip8) {
 
   default:
     fprintf(stderr, "Error: Unknown opcode %X\n", chip8->opcode);
-      chip8->pc += 2;
+    chip8->pc += 2;
     break;
 
     // timers
-    /* if (chip8->delay_timer > 0) */
-    /*   --chip8->delay_timer; */
-    /* if (chip8->sound_timer > 0) { */
-    /*   if (chip8->sound_timer == 1) */
-    /*     play_sound(); */
-    /*   --chip8->sound_timer; */
-    /* } */
+    if (chip8->delay_timer > 0) {
+      --chip8->delay_timer;
+    }
+    if (chip8->sound_timer > 0) {
+      if (chip8->sound_timer == 1) {
+        SDL_PauseAudioDevice(g_audio_device, 0);
+        --chip8->sound_timer;
+      } else {
+        SDL_PauseAudioDevice(g_audio_device, 1);
+      }
+    }
   }
 }

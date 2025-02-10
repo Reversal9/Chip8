@@ -9,6 +9,7 @@ int main(int argc, char *argv[]) {
   init_chip8(&chip8);
   init_input();
   init_display(&chip8, MAX_WIDTH, MAX_HEIGHT);
+  init_audio();
 
   if (load_rom(&chip8, ROM_PATH) == INVALID_ROM_ERR) {
     fprintf(stderr, "Error: Could not load ROM\n");
@@ -50,7 +51,9 @@ int main(int argc, char *argv[]) {
 
     // Play beep if flag is set
     /* if (play_sound) { */
-    /*   play_beep(); */
+    /*   SDL_PauseAudioDevice(g_audio_device, 0); */
+    /* } else { */
+    /*   SDL_PauseAudioDevice(g_audio_device, 1); */
     /* } */
   }
 

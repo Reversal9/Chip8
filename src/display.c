@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
+#include <stdint.h>
 #include <stdio.h>
 
 // Global variables for the display
@@ -15,6 +16,11 @@ bool g_is_running = true;
 // Variable for the draw flag set by CHIP-8
 
 bool g_draw_flag = false;
+
+// Global variables for the audio
+
+SDL_AudioDeviceID g_audio_device = 0;
+SDL_AudioSpec g_audio_spec = {0};
 
 void update_display(Chip8 *chip8) {
   if (g_window == NULL) {
@@ -146,4 +152,36 @@ int init_display(Chip8 *chip8, int width, int height) {
 void close_display() {
   SDL_DestroyWindow(g_window);
   SDL_Quit();
+}
+
+void audio_callback(void *userdata, Uint8 *stream, int len) {
+  static int phase = 0;
+  int16_t *buffer = (int16_t *)stream;
+  int samples = len / 2;
+
+  for (int i = 0; i < samples; i++) {
+    buffer[i] =
+        (phase < SAMPLE_RATE / SOUND_FREQUENCY / 2) ? AMPLITUDE : -AMPLITUDE;
+    phase = (phase + 1) % (SAMPLE_RATE / SOUND_FREQUENCY);
+  }
+}
+
+int init_audio() {
+  SDL_AudioSpec desired_spec = {0};
+  SDL_memset(&desired_spec, 0, sizeof(desired_spec));
+
+  desired_spec.freq = SAMPLE_RATE;
+  desired_spec.format = AUDIO_S16SYS;
+  desired_spec.channels = 1;
+  desired_spec.samples = 1024;
+  desired_spec.callback = audio_callback;
+
+  g_audio_device =
+      SDL_OpenAudioDevice(NULL, 0, &desired_spec, &g_audio_spec, 0);
+  if (g_audio_device == 0) {
+    printf("Failed to open audio device: %s\n", SDL_GetError());
+    return SDL_AUDIO_ERROR;
+  }
+
+  return OK;
 }
