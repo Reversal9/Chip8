@@ -66,6 +66,7 @@ int load_rom(Chip8 *chip8, char *rom_path) {
 
   if (fp == NULL) {
     fprintf(stderr, "Error: Unable to read file %s\n", rom_path);
+    return INVALID_ROM_ERR;
   }
 
   // Get each byte inside the rom file and store it in memory starting from
