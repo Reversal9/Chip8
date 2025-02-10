@@ -1,6 +1,5 @@
 #include "../include/chip8.h"
 #include "../include/display.h"
-#include "../include/input.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -187,7 +186,7 @@ void execute_opcode(Chip8 *chip8) {
           chip8->V[Vy(chip8->opcode)] - chip8->V[Vx(chip8->opcode)];
     } else if (LN(chip8->opcode) ==
                0xE) { // 8XYE: VF = MSB, left shifts Vx by 1
-      chip8->V[0xF] = HN(chip8->V[Vx(chip8->opcode)]);
+      chip8->V[0xF] = Vy(chip8->V[Vx(chip8->opcode)]);
       chip8->V[Vx(chip8->opcode)] <<= 1;
     }
     chip8->pc += 2;

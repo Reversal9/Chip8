@@ -178,7 +178,7 @@ int init_audio() {
 
   g_audio_device =
       SDL_OpenAudioDevice(NULL, 0, &desired_spec, &g_audio_spec, 0);
-  if (g_audio_device == 0) {
+  if (g_audio_device != 0) {
     printf("Failed to open audio device: %s\n", SDL_GetError());
     return SDL_AUDIO_ERROR;
   }
