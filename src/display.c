@@ -120,7 +120,7 @@ int init_display(Chip8 *chip8, int width, int height) {
   // Create the window to display the CHIP-8 screen
 
   g_window = SDL_CreateWindow("CHIP-8", SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED, MAX_WIDTH, MAX_HEIGHT,
+                              SDL_WINDOWPOS_UNDEFINED, width, height,
                               SDL_WINDOW_SHOWN);
 
   if (g_window == NULL) {
