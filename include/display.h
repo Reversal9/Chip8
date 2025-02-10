@@ -18,6 +18,8 @@ extern SDL_Window *g_window;
 extern SDL_Surface *g_screen_surface;
 extern bool g_is_running;
 
+extern bool g_draw_flag;
+
 // Program codes
 #define OK (0)
 #define SDL_INIT_ERROR (-1)

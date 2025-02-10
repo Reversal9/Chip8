@@ -5,10 +5,16 @@
 #include <SDL2/SDL_render.h>
 #include <stdio.h>
 
+// Global variables for the display
+
 SDL_Window *g_window = NULL;
 SDL_Renderer *g_renderer = NULL;
 SDL_Texture *g_texture = NULL;
 bool g_is_running = true;
+
+// Variable for the draw flag set by CHIP-8
+
+bool g_draw_flag = false;
 
 void update_display(Chip8 *chip8) {
   if (g_window == NULL) {
