@@ -26,8 +26,8 @@
 #define LN(opcode) (opcode & 0x000F)         // last 4 MSB
 #define NN(opcode) (opcode & 0x00FF)         // last 8 MSB
 #define NNN(opcode) (opcode & 0x0FFF)        // last 12 MSB (memory address)
-#define Vx(opcode) ((opcode & 0x0F00) >> 2)  // second nibble
-#define Vy(opcode) ((opcode & 0x00F0) >> 1)  // third nibble
+#define Vx(opcode) ((opcode & 0x0F00) >> 8)  // second nibble
+#define Vy(opcode) ((opcode & 0x00F0) >> 4)  // third nibble
 
 // Chip8 struct
 typedef struct {
@@ -42,8 +42,8 @@ typedef struct {
               // empty index [0, STACK_SIZE - 1]
   uint8_t delay_timer; // set and read, counts to 0 at 60 Hz
   uint8_t sound_timer; // read, beeps when non-zero at 60 Hz
-  uint8_t gfx[MAX_WIDTH]
-             [MAX_HEIGHT];     // graphics of chip8 are black (1) and white (0),
+  uint8_t gfx[MAX_HEIGHT]
+             [MAX_WIDTH];     // graphics of chip8 are black (1) and white (0),
                                // screen has MAX_WIDTH by MAX_HEIGHT pixels
   uint8_t keypad[KEYPAD_SIZE]; // stores current state of each key (bitmap)
 } Chip8;

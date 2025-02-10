@@ -72,40 +72,32 @@ void draw_sprite(Chip8 *chip8, int Vx, int Vy, int N) {
 
   bool has_flipped = false;
 
-  // TODO
   for (int i = 0; i < N; i++) {
     // Read a byte from memory
-
     uint8_t byte = chip8->memory[chip8->I + i]; // each byte has 8 bits
+    printf("byte: %d\n", byte);
 
     for (int j = 0; j < SPRITE_WIDTH; j++) {
       // Get position of the pixel to draw
-
-      int x = Vx + i;
-      int y = Vy + j;
+      int x = (Vx + j) % MAX_WIDTH;  // Wrap around if necessary
+      int y = (Vy + i) % MAX_HEIGHT; // Wrap around if necessary
 
       // Get the pixel value
-
-      int pixel = (byte >> (SPRITE_WIDTH - 1 - i)) & 0x1;
-      int current_pixel = chip8->gfx[x][y];
+      int pixel = (byte >> (SPRITE_WIDTH - 1 - j)) & 0x1;
+      int current_pixel = chip8->gfx[y][x];
 
       // XOR the pixel values
-
-      chip8->gfx[x][y] ^= pixel;
+      chip8->gfx[y][x] ^= pixel;
 
       // Check if pixel was flipped from SET to UNSET
-
-      if ((current_pixel == SET) && (chip8->gfx[x][y] == UNSET)) {
+      if ((current_pixel == SET) && (chip8->gfx[y][x] == UNSET)) {
         has_flipped = true;
       }
     }
-
-    if (has_flipped) {
-      chip8->V[0xF] = 1;
-    } else {
-      chip8->V[0xF] = 0;
-    }
   }
+
+  // Set V[0xF] based on whether any pixel was flipped
+  chip8->V[0xF] = has_flipped ? 1 : 0;
 }
 
 int init_display(Chip8 *chip8, int width, int height) {
