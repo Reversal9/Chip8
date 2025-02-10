@@ -2,6 +2,6 @@
 #define MAIN_H
 
 // Other definitions
-#define ROM_PATH "../roms/ibm.ch8"
+#define ROM_PATH "../roms/corax.ch8"
 
 #endif // MAIN_H
