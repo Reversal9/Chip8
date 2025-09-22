@@ -77,7 +77,7 @@ int load_rom(Chip8 *chip8, char *rom_path) {
 
   // Read one byte each time (char) and place it in memory
 
-  while (fscanf(fp, "%c", &byte) == 1) {
+  while (fread(&byte, 1, 1, fp) == 1) {
     // Check for memory overflow, when ROM is formatted incorrectly (too large)
 
     if (i >= MEMORY_SIZE) {
@@ -115,7 +115,8 @@ void execute_opcode(Chip8 *chip8) {
       g_draw_flag = true;
       chip8->pc += 2;
     } else if (chip8->opcode == 0x00EE) { // 00EE: return from subroutine
-      chip8->pc = chip8->stack[--(chip8->sp)];
+      chip8->pc = chip8->stack[--(chip8->sp)] +
+                  2; // Add 2 because we want to continue execution
     }
     break;
 
@@ -172,25 +173,26 @@ void execute_opcode(Chip8 *chip8) {
     } else if (LN(chip8->opcode) == 0x3) { // 8XY3: sets Vx ^= Vy
       chip8->V[Vx(chip8->opcode)] ^= chip8->V[Vy(chip8->opcode)];
     } else if (LN(chip8->opcode) == 0x4) { // 8XY4: sets Vx += Vy, VF = 1 if OF
-      chip8->V[Vx(chip8->opcode)] += chip8->V[Vy(chip8->opcode)];
-      chip8->V[0xF] =
-          (chip8->V[Vy(chip8->opcode)] > chip8->V[Vx(chip8->opcode)]) ? 1 : 0;
+      uint16_t sum = chip8->V[Vx(chip8->opcode)] + chip8->V[Vy(chip8->opcode)];
+      chip8->V[Vx(chip8->opcode)] = sum & 0xFF;
+      chip8->V[0xF] = (sum > 0xFF) ? 1 : 0;
     } else if (LN(chip8->opcode) == 0x5) { // 8XY5: sets Vx -= Vy, VF = 0 if UF
-      chip8->V[Vx(chip8->opcode)] -= chip8->V[Vy(chip8->opcode)];
+      uint16_t sum = chip8->V[Vx(chip8->opcode)] - chip8->V[Vy(chip8->opcode)];
+      chip8->V[Vx(chip8->opcode)] = sum & 0xFF;
       chip8->V[0xF] =
-          (chip8->V[Vx(chip8->opcode)] >= chip8->V[Vy(chip8->opcode)]) ? 1 : 0;
+          (chip8->V[Vx(chip8->opcode)] >= chip8->V[Vy(chip8->opcode)]) ? 0 : 1;
     } else if (LN(chip8->opcode) ==
                0x6) { // 8XY6: VF = LSB, right shifts Vx by 1
-      chip8->V[0xF] = LN(chip8->V[Vx(chip8->opcode)]);
+      chip8->V[0xF] = chip8->V[Vx(chip8->opcode)] & 0x1;
       chip8->V[Vx(chip8->opcode)] >>= 1;
     } else if (LN(chip8->opcode) == 0x7) { // 8XY7: Vx = Vy - Vx, VF = 0 if UF
+      uint16_t sum = chip8->V[Vy(chip8->opcode)] - chip8->V[Vx(chip8->opcode)];
+      chip8->V[Vx(chip8->opcode)] = sum & 0xFF;
       chip8->V[0xF] =
-          (chip8->V[Vy(chip8->opcode)] >= chip8->V[Vx(chip8->opcode)]) ? 1 : 0;
-      chip8->V[Vx(chip8->opcode)] =
-          chip8->V[Vy(chip8->opcode)] - chip8->V[Vx(chip8->opcode)];
+          (chip8->V[Vy(chip8->opcode)] >= chip8->V[Vx(chip8->opcode)]) ? 0 : 1;
     } else if (LN(chip8->opcode) ==
                0xE) { // 8XYE: VF = MSB, left shifts Vx by 1
-      chip8->V[0xF] = Vy(chip8->V[Vx(chip8->opcode)]);
+      chip8->V[0xF] = chip8->V[Vx(chip8->opcode)] >> 7;
       chip8->V[Vx(chip8->opcode)] <<= 1;
     }
     chip8->pc += 2;
@@ -214,7 +216,7 @@ void execute_opcode(Chip8 *chip8) {
     break;
 
   case 0xC: // CXNN: sets Vx = rand(0, 255) & NN
-    chip8->V[Vx(chip8->opcode)] = (rand() % 255 + 1) & NN(chip8->opcode);
+    chip8->V[Vx(chip8->opcode)] = (rand() % 256) & NN(chip8->opcode);
     chip8->pc += 2;
     break;
 
@@ -275,17 +277,17 @@ void execute_opcode(Chip8 *chip8) {
        * 0; */
     } else if (NN(chip8->opcode) ==
                0x29) { // FX29: sets I to location of sprite for digit Vx
-      chip8->I = chip8->V[Vx(chip8->opcode) + 0x50];
+      chip8->I = chip8->V[Vx(chip8->opcode) * 5 + 0x50];
     } else if (NN(chip8->opcode) ==
                0x33) { // FX33: stores BCD representation of Vx in memory
       chip8->memory[chip8->I] = chip8->V[Vx(chip8->opcode)] / 100;
       chip8->memory[chip8->I + 1] = (chip8->V[Vx(chip8->opcode)] / 10) % 10;
-      chip8->memory[chip8->I + 2] = (chip8->V[Vx(chip8->opcode)] / 100) % 10;
+      chip8->memory[chip8->I + 2] = chip8->V[Vx(chip8->opcode)] % 10;
     } else if (NN(chip8->opcode) == 0x55) { // FX55: stores V0 to Vx in memory
       for (int i = 0x0; i <= Vx(chip8->opcode); i++) {
         chip8->memory[chip8->I + i] = chip8->V[i];
       }
-    } else if (NN(chip8->opcode) == 0x65) { // FX66: fills v0 to Vx from memory
+    } else if (NN(chip8->opcode) == 0x65) { // FX65: fills v0 to Vx from memory
       for (int i = 0x0; i <= Vx(chip8->opcode); i++) {
         chip8->V[i] = chip8->memory[chip8->I + i];
       }
@@ -297,18 +299,18 @@ void execute_opcode(Chip8 *chip8) {
     fprintf(stderr, "Error: Unknown opcode %X\n", chip8->opcode);
     chip8->pc += 2;
     break;
+  }
 
-    // timers
-    if (chip8->delay_timer > 0) {
-      --chip8->delay_timer;
-    }
-    if (chip8->sound_timer > 0) {
-      if (chip8->sound_timer == 1) {
-        SDL_PauseAudioDevice(g_audio_device, 0);
-        --chip8->sound_timer;
-      } else {
-        SDL_PauseAudioDevice(g_audio_device, 1);
-      }
+  // timers
+  if (chip8->delay_timer > 0) {
+    --chip8->delay_timer;
+  }
+  if (chip8->sound_timer > 0) {
+    if (chip8->sound_timer == 1) {
+      SDL_PauseAudioDevice(g_audio_device, 0);
+      --chip8->sound_timer;
+    } else {
+      SDL_PauseAudioDevice(g_audio_device, 1);
     }
   }
 }
